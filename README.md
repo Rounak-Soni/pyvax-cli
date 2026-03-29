@@ -271,10 +271,10 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 ## 👨‍💻 Author
 
-**[Your Name]** — Third-year CS student passionate about blockchain and developer tooling.
+**[Rounak soni]** — Third-year CS student passionate about blockchain and developer tooling.
 
-- GitHub: [@YOUR_USERNAME](https://github.com/YOUR_USERNAME)
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
+- GitHub: [@Rounak-Soni](https://github.com/Rounak-Soni)
+- LinkedIn: [Rounak soni](https://www.linkedin.com/in/rounak-soni-169281362?utm_source=share_via&utm_content=profile&utm_medium=member_android)
 
 ---
 
