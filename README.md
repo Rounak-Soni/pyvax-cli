@@ -1,281 +1,300 @@
-# 🐍 PyVax CLI — Python-to-EVM Smart Contract Compiler
+# PyVax - Avalanche Smart Contract CLI
 
-> **Write smart contracts in pure Python. Deploy to any EVM blockchain.**
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python)](https://www.python.org/)
-[![EVM Compatible](https://img.shields.io/badge/EVM-Compatible-purple?style=flat-square)](https://ethereum.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)]()
+**PyVax** is a production-ready CLI tool for deploying Solidity and Python smart contracts to Avalanche C-Chain. It features a unique **Python-to-EVM transpiler** that allows you to write smart contracts in Python and deploy them directly to the blockchain.
 
----
+## 🚀 Features
 
-## 📌 Overview
-
-**PyVax CLI** is a full-stack developer toolchain that compiles standard Python classes directly into **EVM (Ethereum Virtual Machine) bytecode** — without requiring developers to learn Solidity, Vyper, or any blockchain-specific syntax.
-
-It uses **AST (Abstract Syntax Tree) analysis** and **Python naming conventions** to automatically determine function visibility, generate ABI definitions, and produce deployment-ready smart contracts — all from regular Python code.
-
-> 💡 Built as part of the **py0g** project by [ShahiTechnovation](https://github.com/ShahiTechnovation/py0g)
-
----
-
-## 🎯 Problem Statement
-
-Blockchain development has a steep learning curve. Developers must abandon familiar tools and learn entirely new languages (Solidity/Vyper) just to write smart contracts.
-
-**PyVax solves this by letting Python developers:**
-- Write contracts in standard Python — no new syntax
-- Use any Python IDE (VSCode, PyCharm) without special extensions
-- Debug with the Python debugger they already know
-- Migrate existing Python classes into smart contracts with minimal changes
-
----
-
-## ✨ Key Features
-
-| Feature | Description |
-|---|---|
-| 🔄 **Python-to-EVM Transpiler** | Converts Python classes to EVM opcodes and bytecode |
-| 🧠 **AST-Based Analysis** | Parses Python code structure without decorators or annotations |
-| 📋 **Auto ABI Generation** | Generates complete ABI definitions from function signatures |
-| 🔐 **Visibility Detection** | Public/private functions detected via Python naming conventions |
-| ⛽ **Gas Optimization** | Configurable optimization settings for deployment |
-| 🚀 **Multi-Network Deploy** | Deploys to Avalanche and other EVM-compatible networks |
-| 🔒 **Encrypted Wallet** | Keystore management with secure keystore files |
-| 📡 **Contract Interaction** | CLI-based interaction with deployed smart contracts |
-
----
-
-## 🏗️ Architecture
-
-```
-PyVax CLI
-├── cli.py                  # Typer-powered CLI — 6 commands
-├── compiler.py             # Contract compiler (Solidity + Python contracts)
-├── transpiler.py           # Python-to-EVM transpiler (3 main classes)
-│   ├── PythonASTAnalyzer       # Parses AST → extracts state, functions, events
-│   ├── EVMBytecodeGenerator    # Converts AST → EVM opcodes + bytecode
-│   └── PythonContractTranspiler # Orchestrates analysis + ABI generation
-├── py_contracts.py         # Python Smart Contract Framework
-├── deployer.py             # Deployment engine (Avalanche networks)
-└── wallet.py               # Encrypted wallet management
-```
-
-### Workflow
-
-```
-Python Contract (.py)
-        │
-        ▼
-  PythonASTAnalyzer
-  (Extract: state vars, public/private functions, events)
-        │
-        ▼
-  EVMBytecodeGenerator
-  (Generate: function selectors, dispatcher, init + runtime bytecode)
-        │
-        ├──────────────────────┐
-        ▼                      ▼
-  Deployment Bytecode    Runtime Bytecode
-  (deploys contract)     (executes functions)
-        │
-        ▼
-  ABI Definition
-  (how to interact with deployed contract)
-        │
-        ▼
-  Deployed on EVM Network ✅
-```
-
----
-
-## 🔬 How It Works — Technical Deep Dive
-
-### 1. Function Visibility (No Decorators Needed)
-
-PyVax uses **Python naming conventions** — the same ones every Python developer already follows:
-
-```python
-class MyToken:
-    def __init__(self, owner: str):        # Constructor — special handling
-        self.owner = owner
-
-    def transfer(self, to: str, amount: int):    # PUBLIC — no underscore
-        return self._validate_transfer(to, amount)
-
-    def balance_of(self, account: str):          # PUBLIC — no underscore
-        return self.balances.get(account, 0)
-
-    def _validate_transfer(self, to, amount):    # PRIVATE — starts with _
-        return amount > 0 and to != ""
-```
-
-### 2. EVM Bytecode Generation Pipeline
-
-**Step 1 — Function Selector Generation** (like Solidity's 4-byte selector):
-```python
-# transfer(uint256,uint256) → 0xa9059cbb
-signature = f"{name}({','.join(param_types)})"
-hash_bytes = hashlib.sha256(signature.encode()).digest()
-selector = int.from_bytes(hash_bytes[:4], 'big')
-```
-
-**Step 2 — EVM Function Dispatcher**:
-```
-CALLDATALOAD → extract 4-byte selector
-For each public function:
-    DUP1 → PUSH4 <selector> → EQ → JUMPI to implementation
-Default: REVERT
-```
-
-**Step 3 — State Mutability Detection** (AST analysis, no `@view` decorator needed):
-```python
-# Checks for self.x = ... assignments in AST → nonpayable
-# Detects read-only patterns (get_, balance_of, etc.) → view
-```
-
-### 3. ABI Generation
-
-The transpiler auto-generates a complete ABI compatible with Web3.js, ethers.js, and all standard EVM tooling — no manual ABI writing required.
-
----
-
-## 🖥️ CLI Commands
-
-```bash
-# Create a new project with sample contracts
-pyvax init my_project
-
-# Compile a Python or Solidity contract
-pyvax compile contracts/MyToken.py
-
-# Deploy to Avalanche Fuji (testnet) or Mainnet
-pyvax deploy contracts/MyToken.py --network fuji
-
-# Manage encrypted wallets
-pyvax wallet --create
-
-# Interact with a deployed contract
-pyvax interact --address 0xABC... --function transfer
-
-# Get info about a deployed contract
-pyvax info --address 0xABC...
-```
-
----
+- **Python Smart Contracts**: Write smart contracts in Python and transpile them to EVM bytecode
+- **Solidity Support**: Full support for Solidity contract compilation and deployment
+- **Multi-Network**: Deploy to Avalanche Fuji testnet or mainnet
+- **Secure Wallet Management**: Encrypted keystore with PBKDF2 encryption
+- **Gas Estimation**: Accurate gas estimation before deployment
+- **Rich CLI Interface**: Beautiful command-line interface with progress indicators
+- **Deployment Tracking**: Automatic tracking of deployed contracts
 
 ## 📦 Installation
 
+### Using pip
+
 ```bash
-# Clone the repository
-git clone https://github.com/YOUR_USERNAME/pyvax-cli.git
-cd pyvax-cli
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the CLI
-python -m pyvax --help
+pip install -e .
 ```
 
-**Dependencies:**
-- `typer` — CLI framework
-- `rich` — Beautiful terminal output
-- `web3.py` — Ethereum interaction
-- `py-solc-x` — Solidity compiler (for `.sol` contracts)
+### Using pip with requirements.txt
 
----
+```bash
+pip install -r requirements.txt
+pip install -e .
+```
 
-## 📝 Example: Write a Token Contract in Python
+### Development Installation
+
+```bash
+pip install -e ".[dev]"
+```
+
+## 🔧 Quick Start
+
+### 1. Initialize a New Project
+
+```bash
+python -m avax_cli.cli init my_project
+cd my_project
+```
+
+This creates a new project with:
+- Sample Python and Solidity contracts
+- Default configuration file
+- Deployment scripts
+
+### 2. Create a Wallet
+
+```bash
+python -m avax_cli.cli wallet new
+```
+
+This will:
+- Generate a new encrypted wallet
+- Save it as `avax_key.json`
+- Display your wallet address
+
+**⚠️ Important**: Fund your wallet with AVAX before deploying contracts!
+
+### 3. Compile Contracts
+
+```bash
+python -m avax_cli.cli compile
+```
+
+This compiles both Python and Solidity contracts in the `contracts/` directory.
+
+### 4. Deploy Contracts
+
+```bash
+# Deploy to Fuji testnet (default)
+python -m avax_cli.cli deploy SimpleStorage
+
+# Deploy to mainnet
+python -m avax_cli.cli deploy SimpleStorage --network mainnet
+
+# Deploy with constructor arguments
+python -m avax_cli.cli deploy SimpleStorage --args '[42]'
+
+# Dry run (estimate gas only)
+python -m avax_cli.cli deploy SimpleStorage --dry-run
+```
+
+## 🐍 Python Smart Contracts
+
+PyVax allows you to write smart contracts in Python using a special syntax:
 
 ```python
-# contracts/MyToken.py
+from avax_cli.py_contracts import PySmartContract
 
-class MyToken:
-    """A simple ERC-20-style token written in pure Python."""
-
-    def __init__(self, owner: str):
-        self.owner = owner
-        self.total_supply = 1_000_000
-        self.balances = {owner: 1_000_000}
-
-    def transfer(self, to: str, amount: int) -> bool:
-        sender = self.msg_sender
-        if self.balances.get(sender, 0) >= amount:
-            self.balances[sender] -= amount
-            self.balances[to] = self.balances.get(to, 0) + amount
-            return True
-        return False
-
-    def balance_of(self, account: str) -> int:
-        return self.balances.get(account, 0)
-
-    def _check_owner(self) -> bool:          # PRIVATE — not exposed to ABI
-        return self.msg_sender == self.owner
+class SimpleStorage(PySmartContract):
+    """Simple storage contract in Python."""
+    
+    def __init__(self):
+        super().__init__()
+        self.stored_data = self.state_var("stored_data", 0)
+    
+    @public_function
+    def set(self, value: int):
+        """Set stored data."""
+        self.stored_data = value
+        self.event("DataStored", value)
+    
+    @view_function
+    def get(self) -> int:
+        """Get stored data."""
+        return self.stored_data
 ```
 
-**Compile and deploy:**
+### Python Contract Features
+
+- **State Variables**: Use `self.state_var(name, initial_value)`
+- **Public Functions**: Use `@public_function` decorator
+- **View Functions**: Use `@view_function` decorator
+- **Events**: Use `self.event(name, *params)`
+- **Basic Types**: Support for `int`, `str`, and basic operations
+
+## 📋 CLI Commands
+
+### Project Management
+
 ```bash
-pyvax compile contracts/MyToken.py
-pyvax deploy contracts/MyToken.py --network fuji
+# Initialize new project
+avax-cli init <project_name> [--force]
+
+# Compile contracts
+avax-cli compile [--contracts contracts/] [--output build/]
 ```
 
----
+### Wallet Management
 
-## 🆚 PyVax vs Traditional Approaches
+```bash
+# Create new wallet
+avax-cli wallet new [--password PASSWORD] [--keystore avax_key.json]
 
-| | PyVax (Python) | Solidity | Vyper |
-|---|---|---|---|
-| **Language** | Standard Python | New language | New language |
-| **IDE Support** | Any Python IDE ✅ | Remix / special plugins | Limited |
-| **Debugging** | Python debugger ✅ | Hardhat / Truffle | Limited |
-| **Learning Curve** | Zero (for Python devs) ✅ | High ❌ | Medium ❌ |
-| **Decorator Required** | No ✅ | N/A | Yes (`@external`) |
-| **ABI Generation** | Automatic ✅ | Manual / compiler | Manual / compiler |
-| **Migration from Python** | Easy ✅ | Full rewrite ❌ | Full rewrite ❌ |
+# Show wallet info
+avax-cli wallet show [--keystore avax_key.json]
+```
 
----
+### Contract Deployment
 
-## 🗺️ Roadmap
+```bash
+# Deploy contract
+avax-cli deploy <contract_name> [OPTIONS]
 
-- [x] Python-to-EVM transpiler (core engine)
-- [x] AST-based visibility and mutability detection
-- [x] ABI auto-generation
-- [x] Avalanche network deployment
-- [x] Encrypted wallet management
-- [ ] Support for events and indexed logs
-- [ ] ERC-20 / ERC-721 standard templates
-- [ ] Hardhat/Foundry integration
-- [ ] Unit test framework for Python contracts
-- [ ] VS Code extension
+# Options:
+#   --args TEXT          Constructor arguments as JSON array
+#   --config TEXT        Configuration file path
+#   --dry-run           Estimate gas without deploying
+#   --network TEXT      Override network (fuji/mainnet)
+```
 
----
+## ⚙️ Configuration
+
+### Network Configuration (`avax_config.json`)
+
+```json
+{
+  "network": "fuji",
+  "rpc_url": "https://api.avax-test.network/ext/bc/C/rpc",
+  "chain_id": 43113,
+  "explorer_api_key": ""
+}
+```
+
+### Supported Networks
+
+| Network | Chain ID | RPC URL |
+|---------|----------|---------|
+| Fuji (Testnet) | 43113 | https://api.avax-test.network/ext/bc/C/rpc |
+| Mainnet | 43114 | https://api.avax.network/ext/bc/C/rpc |
+
+## 🔐 Security
+
+### Wallet Security
+
+- Wallets are encrypted using PBKDF2 with SHA-256
+- Private keys are never stored in plain text
+- Support for environment variable (`PRIVATE_KEY`) for CI/CD
+
+### Best Practices
+
+1. **Never commit private keys** to version control
+2. **Use strong passwords** for wallet encryption
+3. **Backup your keystore files** securely
+4. **Test on Fuji testnet** before mainnet deployment
+
+## 📁 Project Structure
+
+```
+my-project/
+├── contracts/           # Smart contracts (.sol and .py files)
+│   ├── SimpleStorage.py
+│   └── SimpleStorage.sol
+├── build/              # Compiled contract artifacts
+├── scripts/            # Deployment scripts
+│   └── deploy.py
+├── avax_config.json    # Network configuration
+└── deployments.json   # Deployment history
+```
+
+## 🛠️ Development
+
+### Running Tests
+
+```bash
+pytest
+```
+
+### Code Formatting
+
+```bash
+black avax_cli/
+isort avax_cli/
+```
+
+### Type Checking
+
+```bash
+mypy avax_cli/
+```
+
+## 📖 Examples
+
+### Example 1: Counter Contract
+
+```python
+class Counter(PySmartContract):
+    def __init__(self):
+        super().__init__()
+        self.count = self.state_var("count", 0)
+    
+    @public_function
+    def increment(self):
+        self.count = self.count + 1
+        self.event("Incremented", self.count)
+    
+    @view_function
+    def get_count(self) -> int:
+        return self.count
+```
+
+### Example 2: Deployment Script
+
+```python
+#!/usr/bin/env python3
+from avax_cli.deployer import deploy_contract
+from avax_cli.wallet import WalletManager
+import json
+
+# Load configuration
+with open("avax_config.json") as f:
+    config = json.load(f)
+
+# Deploy contract
+wallet = WalletManager()
+result = deploy_contract(
+    contract_name="Counter",
+    constructor_args=[],
+    config=config,
+    wallet=wallet
+)
+
+print(f"Contract deployed at: {result['address']}")
+```
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request.
-
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Run the test suite
+6. Submit a pull request
 
 ## 📄 License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- **Issues**: [GitHub Issues](https://github.com/pyvax/avax-cli/issues)
+- **Documentation**: [GitHub README](https://github.com/pyvax/avax-cli#readme)
+- **Avalanche Docs**: [Official Documentation](https://docs.avax.network/)
+
+## 🔗 Links
+
+- [Avalanche Network](https://www.avax.network/)
+- [Avalanche C-Chain Explorer](https://snowtrace.io/)
+- [Fuji Testnet Faucet](https://faucet.avax.network/)
 
 ---
 
-## 👨‍💻 Author
-
-**[Rounak soni]** — Third-year CS student passionate about blockchain and developer tooling.
-
-- GitHub: [@Rounak-Soni](https://github.com/Rounak-Soni)
-- LinkedIn: [Rounak soni](https://www.linkedin.com/in/rounak-soni-169281362?utm_source=share_via&utm_content=profile&utm_medium=member_android)
-
----
-
-> ⭐ If you find this project useful, please consider giving it a star — it helps others discover it!
+**⚡ Happy Building on Avalanche! ⚡**
